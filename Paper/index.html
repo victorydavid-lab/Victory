@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prioritising Content for Future Organic Traffic</title>
+<meta name="description" content="A time-aware analysis of search-performance signals for prioritising content for SEO review using the FlyRank ML Internship dataset.">
+<style>
+:root{
+  --bg:#f7f7f4; --card:#fff; --ink:#171717; --muted:#626262;
+  --line:#deded8; --accent:#1d4ed8; --accent-soft:#eaf0ff;
+  --good:#176b45; --warn:#9a5b00; --max:1050px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.7}
+a{color:var(--accent)}
+header{background:#111;color:#fff;padding:72px 24px 58px}
+header .wrap, main, footer{max-width:var(--max);margin:auto}
+.eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:#bdbdbd;margin-bottom:18px}
+h1{font-size:clamp(2.2rem,6vw,4.5rem);line-height:1.02;max-width:900px;margin:0 0 22px;font-weight:850;letter-spacing:-.045em}
+.subtitle{font-size:1.08rem;color:#d5d5d5;max-width:760px}
+nav{position:sticky;top:0;z-index:10;background:rgba(247,247,244,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);overflow:auto}
+nav .navwrap{max-width:var(--max);margin:auto;display:flex;gap:8px;padding:10px 18px}
+nav a{white-space:nowrap;text-decoration:none;color:#555;padding:7px 10px;border-radius:8px;font-size:.88rem}
+nav a:hover{background:#e9e9e4;color:#111}
+main{padding:34px 20px 80px}
+section{padding:48px 0;border-bottom:1px solid var(--line)}
+section:last-child{border-bottom:0}
+h2{font-size:1.85rem;line-height:1.15;margin:0 0 20px;letter-spacing:-.025em}
+h3{font-size:1.15rem;margin:30px 0 8px}
+p{max-width:850px}
+.lead{font-size:1.1rem}
+blockquote{margin:25px 0;padding:18px 22px;border-left:4px solid var(--accent);background:var(--accent-soft);font-size:1.06rem}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:26px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card .num{font-size:1.8rem;font-weight:800;letter-spacing:-.04em}
+.card .label{font-size:.85rem;color:var(--muted)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:22px 0}
+th,td{text-align:left;padding:12px 13px;border-bottom:1px solid var(--line);font-size:.92rem}
+th{background:#f0f0eb;font-weight:700}
+tr:last-child td{border-bottom:0}
+.chartbox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin:26px 0}
+.bar-row{display:grid;grid-template-columns:150px 1fr 60px;gap:12px;align-items:center;margin:12px 0}
+.bar{height:13px;background:#e6e6e1;border-radius:99px;overflow:hidden}
+.fill{height:100%;background:var(--accent);border-radius:99px}
+.bar-value{text-align:right;font-weight:700;font-size:.9rem}
+.small{font-size:.9rem;color:var(--muted)}
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;background:#ecece8;font-size:.8rem;font-weight:700}
+.good{color:var(--good)}
+.warning{color:var(--warn)}
+ul{padding-left:22px}
+.interactive{background:#111;color:#fff;border-radius:18px;padding:25px;margin-top:26px}
+.interactive h3{margin-top:0}
+select{padding:10px 12px;border-radius:9px;border:1px solid #555;background:#fff;color:#111;font-size:1rem;max-width:100%}
+.result{margin-top:18px;background:#202020;border:1px solid #3b3b3b;border-radius:12px;padding:18px}
+.reco-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.reco{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:18px}
+footer{padding:30px 20px 60px;color:var(--muted);font-size:.9rem}
+@media(max-width:760px){
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .reco-grid{grid-template-columns:1fr}
+  .bar-row{grid-template-columns:110px 1fr 52px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">FlyRank ML Internship · Search Intelligence Capstone</div>
+    <h1>PRIORITISING CONTENT FOR FUTURE ORGANIC TRAFFIC</h1>
+    <div class="subtitle">A time-aware analysis of search-performance signals for deciding which content should be reviewed first.</div>
+  </div>
+</header>
+
+<nav>
+  <div class="navwrap">
+    <a href="#abstract">Abstract</a>
+    <a href="#introduction">Introduction</a>
+    <a href="#data">Data</a>
+    <a href="#methodology">Methodology</a>
+    <a href="#results">Results</a>
+    <a href="#limitations">Limitations</a>
+    <a href="#recommendations">Recommendations</a>
+    <a href="#reproducibility">Reproducibility</a>
+    <a href="#acknowledgments">Acknowledgments</a>
+  </div>
+</nav>
+
+<main>
+
+<section id="abstract">
+<h2>Abstract</h2>
+<p class="lead">SEO teams often have more content to review than they can reasonably examine at once. This study asks whether a small set of search-performance signals can help decide which client-content pairs should be prioritised for SEO review because they are more likely to receive organic traffic in a subsequent period. Using the March 2026 FlyRank ML Internship dataset, I aggregated impressions, clicks, average position and active days from an earlier ten-day window and used whether organic sessions occurred in the following window as the binary target. A time-aware logistic regression was then compared with a simpler Week-4 baseline on a later, unseen period. On 254,121 final test rows, the model achieved a ROC-AUC of 0.9460 and Average Precision of 0.7898, compared with 0.8424 and 0.3457 for the baseline; recall was slightly lower than the baseline, but precision and F1 were higher. The model was then used to rank content and turn the scores into a practical review queue, while error analysis showed that the model can still miss pages that later receive organic sessions and can prioritise pages that do not. The result is therefore best treated as a decision-support tool: it helps narrow a large content inventory into a more useful starting point, but it does not guarantee future traffic or explain Google's ranking system.</p>
+</section>
+
+<section id="introduction">
+<h2>1. Introduction / Problem Statement</h2>
+<p>SEO is partly about helping search engines understand content and helping people find it through search. But for a team managing a large content library, the practical challenge comes after that: <strong>what should we look at first?</strong> Google describes SEO as improving a site's presence in Search, while also making clear that there are no simple actions that automatically make a page rank first.</p>
+<p>The FlyRank dataset makes this prioritisation problem visible. At the client-content level, the broader analysis produced <strong>323,739 unique client-content pairs</strong>. Within the modelling workflow, <strong>254,121 content pairs</strong> formed the final test set. At that scale, treating every piece of content as equally important is not a realistic review strategy. A useful system needs to narrow the list and give a team a reason to start with some content before the rest.</p>
+<p>The signals available in the dataset provide a starting point. Search Console performance reporting includes measures such as impressions and clicks, which describe how often users saw and interacted with search results. Average position provides an aggregated view of where a result appeared.</p>
+<p>That leads to the central question of this study:</p>
+<blockquote><strong>Given a large set of content, can search-performance signals be used to identify which content should be prioritised for SEO review because it is more likely to receive organic traffic in a subsequent period?</strong></blockquote>
+<p>The distinction between prioritisation and prediction is important. The purpose of this work is not to tell an SEO team exactly what will happen to a page, nor to explain why Google ranks one page above another. Google states that its ranking systems use many factors and signals across its systems. This study uses only four measurable signals from the available dataset.</p>
+<p>Instead, the model is treated as a <strong>decision-support tool</strong>. It learns from earlier search signals, estimates the likelihood of future organic traffic, and turns a large content inventory into a ranked list for human review.</p>
+<p>The goal is straightforward: <strong>help an SEO team decide what to investigate first, using evidence that is available before the outcome occurs, while remaining clear about what that evidence can—and cannot—tell us.</strong></p>
+</section>
+
+<section id="data">
+<h2>2. Data</h2>
+<p>This study uses the <strong>March 2026 release of the FlyRank ML Internship dataset</strong>, focusing on daily search-performance and organic-session records. The analysis was performed at the client-content pair level rather than at the individual daily-row level. This allowed the model to learn from the recent search activity of each piece of content and compare that activity with organic traffic observed in a later period.</p>
+<p>The main search signals were <strong>GSC impressions, GSC clicks and average position</strong>. The modelling process used two consecutive feature/outcome windows.</p>
+<table>
+<tr><th>Dataset stage</th><th>Feature window</th><th>Outcome window</th><th>Rows</th></tr>
+<tr><td>Training</td><td>1–10 March 2026</td><td>11–20 March 2026</td><td>218,570</td></tr>
+<tr><td>Final test</td><td>11–20 March 2026</td><td>21–31 March 2026</td><td>254,121</td></tr>
+</table>
+<div class="cards">
+<div class="card"><div class="num">323,739</div><div class="label">unique client-content pairs in broader analysis</div></div>
+<div class="card"><div class="num">218,570</div><div class="label">training rows</div></div>
+<div class="card"><div class="num">254,121</div><div class="label">final test rows</div></div>
+<div class="card"><div class="num">12.61%</div><div class="label">final test positive rate</div></div>
+</div>
+<p>The training positive rate was <strong>10.52%</strong>, while the final test positive rate was <strong>12.61%</strong>. A positive case means that the client-content pair recorded at least one organic session during the relevant future outcome window.</p>
+<p>Average position contained missing values. Rather than removing those observations, the modelling pipeline retained them and used median imputation together with a missing-value indicator. This matters because a missing position is different from an observed numerical position: content without a qualifying search impression may have no position recorded.</p>
+<p>No client names, domains, private queries, credentials or raw identifying information are exposed in this paper. Client and content identifiers remain hashed.</p>
+</section>
+
+<section id="methodology">
+<h2>3. Methodology</h2>
+<p>The modelling approach was deliberately simple. The goal was not to build the most complicated model possible, but to test whether a small set of search signals could provide a useful way to prioritise content for future SEO review.</p>
+<h3>Features</h3>
+<ul>
+<li><strong>Total impressions:</strong> total recorded search impressions during the feature window.</li>
+<li><strong>Total clicks:</strong> total recorded clicks during the feature window.</li>
+<li><strong>Average position:</strong> mean recorded search position where a valid position was available.</li>
+<li><strong>Active days:</strong> number of days on which the client-content pair appeared in the feature data.</li>
+</ul>
+<p>These features were calculated only from the period before the outcome window. No future organic-session information was used to construct them.</p>
+<h3>Target definition</h3>
+<p>A client-content pair was labelled <strong>1</strong> when it recorded at least one organic session during the following outcome window and <strong>0</strong> when it recorded none.</p>
+<h3>Model</h3>
+<p>The main model was <strong>Logistic Regression</strong> with balanced class weights. Missing values were handled through median imputation with a missing-value indicator, and numerical features were standardised before fitting.</p>
+<h3>Baseline</h3>
+<p>The Week-4 baseline used two simple search conditions: high impressions and a higher-than-threshold average position. The thresholds were calculated from the training data only. Both the baseline and the model were evaluated on the same final test set.</p>
+<h3>Validation and leakage control</h3>
+<p>The experiment preserved time order. Search signals from <strong>1–10 March</strong> were used to predict organic sessions from <strong>11–20 March</strong> during training. The final evaluation moved forward: <strong>11–20 March</strong> signals were used to predict <strong>21–31 March</strong> organic sessions.</p>
+<p>This design prevents the model from using future outcome information when constructing earlier features. It is consistent with the general principle behind time-aware validation: time-ordered data should not be evaluated by a split that trains on future observations and tests on past observations.</p>
+<h3>Evaluation</h3>
+<p>The methods were evaluated using ROC-AUC, Average Precision, precision, recall and F1. ROC-AUC and Average Precision assess the quality of the predicted scores, while precision, recall and F1 describe performance at the selected 0.5 classification threshold.</p>
+<p>The predicted probabilities were retained after evaluation and used to rank the final content set. This connects the model to the original decision rather than stopping at a classification table.</p>
+</section>
+
+<section id="results">
+<h2>4. Results</h2>
+<p>The first question was whether the logistic regression model provided a meaningful improvement over the simpler Week-4 baseline when both were evaluated on the same unseen period.</p>
+<p>The final test set contained <strong>254,121 client-content pairs</strong>. The positive rate was <strong>12.61%</strong>, so accuracy alone would not tell us much about how useful the ranking was.</p>
+<table>
+<tr><th>Method</th><th>ROC-AUC</th><th>Average Precision</th><th>Precision</th><th>Recall</th><th>F1</th></tr>
+<tr><td>Week-4 baseline</td><td>0.8424</td><td>0.3457</td><td>0.3778</td><td><strong>0.9166</strong></td><td>0.5350</td></tr>
+<tr><td><strong>Logistic Regression</strong></td><td><strong>0.9460</strong></td><td><strong>0.7898</strong></td><td><strong>0.5066</strong></td><td>0.8845</td><td><strong>0.6442</strong></td></tr>
+</table>
+<div class="chartbox">
+<h3 style="margin-top:0">Model vs baseline</h3>
+<div class="bar-row"><span>ROC-AUC</span><div class="bar"><div class="fill" style="width:94.6%"></div></div><span class="bar-value">.9460</span></div>
+<div class="bar-row"><span>Avg. Precision</span><div class="bar"><div class="fill" style="width:78.98%"></div></div><span class="bar-value">.7898</span></div>
+<div class="bar-row"><span>Precision</span><div class="bar"><div class="fill" style="width:50.66%"></div></div><span class="bar-value">.5066</span></div>
+<div class="bar-row"><span>Recall</span><div class="bar"><div class="fill" style="width:88.45%"></div></div><span class="bar-value">.8845</span></div>
+<div class="bar-row"><span>F1</span><div class="bar"><div class="fill" style="width:64.42%"></div></div><span class="bar-value">.6442</span></div>
+<p class="small">The bars show the logistic-regression values. The table above provides the direct comparison with the baseline.</p>
+</div>
+<p>The clearest difference is Average Precision: <strong>0.7898 versus 0.3457</strong>. ROC-AUC also increased from <strong>0.8424 to 0.9460</strong>. The baseline had slightly higher recall, but the model had higher precision and F1, meaning it was more selective while still finding a large share of positive cases.</p>
+<h3>Error analysis</h3>
+<table>
+<tr><th>Error type</th><th>Count</th></tr>
+<tr><td>True Negative</td><td>194,480</td></tr>
+<tr><td>True Positive</td><td>28,338</td></tr>
+<tr><td>False Positive</td><td>27,604</td></tr>
+<tr><td>False Negative</td><td>3,699</td></tr>
+</table>
+<p>The model's largest error group was false positives. Some had substantial search activity before the outcome period but recorded no organic sessions afterwards. This shows why visibility should not automatically be treated as future traffic.</p>
+<p>The false negatives reveal a different limitation. Some content subsequently generated meaningful organic sessions despite having <strong>zero impressions, zero clicks and no recorded average position</strong> during the feature period. One example generated 99 future organic sessions; others generated 49, 47, 39 and 34. The model had little conventional search-performance evidence with which to identify these cases.</p>
+<h3>What the model leaned on</h3>
+<table>
+<tr><th>Feature</th><th>Coefficient</th><th>Absolute effect</th></tr>
+<tr><td>Total clicks</td><td>4.597451</td><td>4.597451</td></tr>
+<tr><td>Total impressions</td><td>2.029234</td><td>2.029234</td></tr>
+<tr><td>Missing average-position indicator</td><td>-1.163249</td><td>1.163249</td></tr>
+<tr><td>Active days</td><td>-0.437500</td><td>0.437500</td></tr>
+<tr><td>Average position</td><td>-0.149377</td><td>0.149377</td></tr>
+</table>
+<p>Within this model and feature set, <strong>total clicks</strong> had the strongest positive coefficient, followed by total impressions. Average position had a smaller negative coefficient after the other features were accounted for.</p>
+<p>These coefficients describe associations used by the fitted model. They do not show that clicks or impressions cause future organic traffic.</p>
+</section>
+
+<section id="limitations">
+<h2>5. Limitations & Honest Framing</h2>
+<p>This model is useful for prioritisation, but it should not be treated as a complete explanation of future organic traffic.</p>
+<p>First, it uses only <strong>four features</strong>: impressions, clicks, average position and active days. These give us a useful view of recent search activity, but they do not describe everything that can affect organic traffic. The analysis does not include content quality, search intent, topic, backlinks, technical SEO, seasonality, competition or changes made to the content.</p>
+<p>Second, the target is deliberately simple. A content pair is positive when it records at least one organic session during the future window. A page receiving one session and a page receiving 100 sessions are therefore both treated as positive.</p>
+<p>Third, the experiment uses specific March 2026 windows. The time-aware design is stronger than randomly mixing past and future observations, but this single forward evaluation does not establish that the same performance will continue across other months, clients or search environments.</p>
+<p>The error analysis gives another useful boundary. There were <strong>27,604 false positives</strong> and <strong>3,699 false negatives</strong>. The model therefore both prioritises some content that does not go on to receive organic sessions and misses some content that does.</p>
+<p>The feature coefficients also need careful interpretation. The strong coefficient for clicks does not mean clicks cause future traffic. It means clicks had the strongest estimated association with the model's prediction among the features used here.</p>
+<p>Finally, this study does not attempt to reproduce Google's ranking system. Google describes its ranking systems as using many factors and signals across its systems. This model represents only a small subset of the information available in search.</p>
+<blockquote><strong>The safest interpretation is simple: this is a prioritisation aid, not a traffic guarantee, a ranking-factor detector, or a causal model of Google Search.</strong></blockquote>
+</section>
+
+<section id="recommendations">
+<h2>6. Ranked Recommendations</h2>
+<p>The model becomes useful when its probability scores are turned into something a reviewer can act on. The final model ranked <strong>254,121 client-content pairs</strong> according to their predicted probability of receiving at least one organic session in the subsequent period.</p>
+<p>A high score does not automatically mean “change this page.” The underlying search signals still matter. Two pages can receive the same model probability while needing very different human decisions.</p>
+<table>
+<tr><th>Situation</th><th>Suggested action</th><th>Reason</th></tr>
+<tr><td>High predicted potential + strong search performance</td><td><strong>Protect / capitalise</strong></td><td>Understand what is working before making unnecessary changes.</td></tr>
+<tr><td>High predicted potential + weaker average position</td><td><strong>Investigate opportunity</strong></td><td>There is evidence of search activity with room for further review.</td></tr>
+<tr><td>High predicted potential + moderate signals</td><td><strong>Review</strong></td><td>The model sees potential, but the evidence needs human context.</td></tr>
+<tr><td>Lower predicted potential</td><td><strong>Monitor</strong></td><td>There is less evidence from the current feature set for immediate attention.</td></tr>
+</table>
+
+<div class="interactive">
+<h3>Make the decision yourself</h3>
+<p style="color:#cfcfcf">Choose a content situation and see the recommended starting action. This is deliberately not an automatic SEO instruction.</p>
+<select id="scenario">
+<option value="protect">Strong position + strong clicks</option>
+<option value="investigate">High visibility + weak position</option>
+<option value="review">High predicted potential + mixed signals</option>
+<option value="monitor">Low predicted potential</option>
+</select>
+<div class="result" id="decisionResult"></div>
+</div>
+
+<h3>What the ranking looks like</h3>
+<p>The highest-ranked examples included both strong performers and pages with weaker positions. For example, one highly ranked pair recorded <strong>12,790 impressions, 23 clicks and an average position of 25.20</strong>. Another recorded <strong>5,383 impressions, 42 clicks and an average position of 2.52</strong>.</p>
+<p>Both received a predicted probability of 1.0, but they should not receive the same treatment. The first is more naturally an <strong>investigate opportunity</strong>; the second is more naturally <strong>protect / capitalise</strong>.</p>
+<p>This is the main reason the final output combines the model score with the underlying search signals. The ranking answers <strong>“what should I look at first?”</strong>, while the action category helps answer <strong>“what should I look for when I get there?”</strong></p>
+<blockquote><strong>The value of the model is not that it makes the SEO decision for us. It gives the next decision a better starting point.</strong></blockquote>
+</section>
+
+<section id="reproducibility">
+<h2>7. Reproducibility</h2>
+<p>The computational work is maintained in the project repository. The Week 5 notebook contains the final time-aware model and baseline comparison, while the capstone notebook brings together the analysis used for the paper.</p>
+<p>The core workflow is:</p>
+<blockquote><strong>Search data → client-content features → future organic-session label → logistic regression → baseline comparison → error analysis → ranked recommendations.</strong></blockquote>
+<p>The model uses the four features described in the methodology section and defines a positive outcome as at least one organic session in the subsequent window.</p>
+<p>The experiment preserves time order. Earlier search signals are used to predict a later outcome, and the final test period is kept separate from model fitting and baseline-threshold calculation.</p>
+<p>The project structure is:</p>
+<ul>
+<li><code>work/</code> — assignment notebooks and capstone notebook</li>
+<li><code>submission/paper_url.txt</code> — the single direct URL of this deployed paper</li>
+<li><code>paper/</code> — this deployed research page</li>
+</ul>
+<p>The public paper does not expose client names, domains, private queries, credentials or raw exports. The identifiers shown in the analysis remain hashed.</p>
+</section>
+
+<section id="acknowledgments">
+<h2>8. Acknowledgments & Data Credit</h2>
+<p>This project was completed as part of the <strong>FlyRank ML Internship</strong>.</p>
+<p>The analysis uses the FlyRank ML Internship dataset and was developed as a practical exercise in working with real search-performance data, building a predictive model, evaluating it against a baseline, examining its errors and turning the result into a decision-support workflow.</p>
+<p>Built on the <a href="https://flyrank.ai" target="_blank" rel="noopener">FlyRank ML Internship dataset</a>.</p>
+<p>The findings, modelling choices, interpretations and recommendations presented here are the author's analysis of the provided dataset and should be understood within the limitations described in this paper.</p>
+</section>
+
+<section id="references">
+<h2>References</h2>
+<ol>
+<li>Google Search Central. <em>SEO Starter Guide: The Basics.</em> <a href="https://developers.google.com/search/docs/fundamentals/seo-starter-guide" target="_blank" rel="noopener">developers.google.com</a></li>
+<li>Google Search Console Help. <em>How are you performing on Google?</em> <a href="https://support.google.com/webmasters/answer/10268906?hl=en" target="_blank" rel="noopener">support.google.com</a></li>
+<li>Google Search Central. <em>A Guide to Google Search Ranking Systems.</em> <a href="https://developers.google.com/search/docs/appearance/ranking-systems-guide" target="_blank" rel="noopener">developers.google.com</a></li>
+<li>Google Search Central. <em>Debugging Search Traffic Drops.</em> <a href="https://developers.google.com/search/docs/monitor-debug/debugging-search-traffic-drops" target="_blank" rel="noopener">developers.google.com</a></li>
+<li>Pedregosa, F., et al. (2011). <em>Scikit-learn: Machine Learning in Python.</em> Journal of Machine Learning Research, 12, 2825–2830. <a href="https://jmlr.org/papers/v12/pedregosa11a.html" target="_blank" rel="noopener">jmlr.org</a></li>
+<li>scikit-learn. <em>TimeSeriesSplit documentation.</em> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html" target="_blank" rel="noopener">scikit-learn.org</a></li>
+<li>scikit-learn. <em>roc_auc_score documentation.</em> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html" target="_blank" rel="noopener">scikit-learn.org</a></li>
+</ol>
+</section>
+
+</main>
+
+<footer>
+<p><strong>Author's analysis · FlyRank ML Internship dataset · March 2026 release</strong></p>
+<p>This page is a public research presentation of the capstone analysis. It is intended for transparency and reproducibility, not as a claim about Google's ranking algorithm or a guarantee of future traffic.</p>
+</footer>
+
+<script>
+const scenarios = {
+  protect: {
+    title: "Protect / capitalise",
+    text: "The content already shows strong search signals. Start by understanding what is working and avoid making unnecessary changes before reviewing the page."
+  },
+  investigate: {
+    title: "Investigate opportunity",
+    text: "The content has meaningful visibility but a weaker position. Review the page, search intent and competitive context before deciding whether an update is justified."
+  },
+  review: {
+    title: "Review",
+    text: "The model sees potential, but the available signals do not point to one clear action. Use the model as a reason to look earlier, then make the decision from the content context."
+  },
+  monitor: {
+    title: "Monitor",
+    text: "The current feature set provides less evidence for immediate attention. Keep the content in the monitoring pool and revisit it when its search signals change."
+  }
+};
+const select = document.getElementById("scenario");
+const result = document.getElementById("decisionResult");
+function renderDecision(){
+  const s = scenarios[select.value];
+  result.innerHTML = "<strong>" + s.title + "</strong><br><span style='color:#cfcfcf'>" + s.text + "</span>";
+}
+select.addEventListener("change", renderDecision);
+renderDecision();
+</script>
+</body>
+</html>
